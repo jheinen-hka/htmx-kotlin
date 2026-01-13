@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="HTMX in Kotlin for Projektarbeit 2 in Master">
+    <meta name="author" content="Josiah Heinen - hejo1030 - 61728">
+    <title>HTMX Demo</title>
+    <link rel="stylesheet" href="./style.css">
+    <!-- import htmx library via the script tag -->
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7"></script>
+    <script>
+        htmx.config.selfRequestsOnly = false;  // Cross-Origin erlauben (HTMX 2.x)
+    </script>
+</head>
+<body>
+    <h3>HTMX Demo</h3>
+    <p>In this demo application a list of messages will be laoded from the server to a div on this page wih the help of htmx attributes</p>
+
+    <hr>
+
+    <!-- get messages from the server without reloading the page -->
+    <!-- hx-get sends a http GET request to the backend server -->
+    <!-- hx-trigger defines when an action should be triggered; =load means that the request should be sent when the element is loaded in the DOM -->
+    <div id="messages" hx-get="http://localhost:8080/messages" hx-trigger="load">
+        Loading Messages...
+    </div>
+
+    <hr>
+
+    <!-- hx-post sends data vie http POST to the server with the data in the form -->
+    <!-- hx-target defines what part of the DOM should be updated (-> the div with id messages) -->
+    <!-- hx-swap defines how the content of the DOM should be replaced (-> update the inner part of the div) -->
+    <form hx-post="http://localhost:8080/add-message" hx-target="#messages" hx-swap="innerHTML" hx-ext="json-enc">
+        <input type="text" name="message" placeholder="Your Message">
+        <button type="submit">Submit &raquo;</button>
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+/* Grundlayout */
+body {
+    font-family: system-ui, Arial, sans-serif;
+    background-color: #fdf6e3;   /* sanftes Beige */
+    color: #333;
+    margin: 0;
+    padding: 2rem;
+    line-height: 1.6;
+}
+
+/* Überschrift */
+h3 {
+    color: #2c3e50;
+    margin-top: 0;
+}
+
+/* Absatz */
+p {
+    max-width: 700px;
+}
+
+/* Trenner */
+hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 1.5rem 0;
+}
+
+/* Nachrichtencontainer */
+#messages {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 50px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: background 0.3s;
+}
+
+#messages:hover {
+    background: #fefefe;
+}
+
+/* Links und Buttons */
+a, button {
+    color: #0069d9;
+    text-decoration: none;
+}
+
+a:hover, button:hover {
+    text-decoration: underline;
+}

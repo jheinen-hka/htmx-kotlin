@@ -1,0 +1,47 @@
+# ---- OS-specific ----
+.DS_Store
+Thumbs.db
+
+# ---- IntelliJ / JetBrains ----
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ---- Other editors/IDEs (optional) ----
+.vscode/
+*.swp
+*~
+
+# ---- Gradle ----
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Gradle app settings
+gradle-app.setting
+gradle-app.setting.lock
+
+# ---- Maven (if used anywhere) ----
+target/
+
+# ---- Logs ----
+*.log
+
+# ---- Java / Kotlin ----
+*.class
+*.war
+*.ear
+
+# ---- Node / frontend (if you add tooling later) ----
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- Environment files ----
+.env
+.env.*
