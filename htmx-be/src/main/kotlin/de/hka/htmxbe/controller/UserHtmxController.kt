@@ -22,6 +22,8 @@ class UserHtmxController(
     // Adjust this base URL if your backend runs on a different host/port
     private val backendBaseUrl = "http://localhost:8080"
 
+    // ---------- Main user list for the User Card ----------
+
     @GetMapping("/users", produces = [MediaType.TEXT_HTML_VALUE])
     fun getUsersHtml(): String =
         renderUserListContainer(service.getUsers())
@@ -102,12 +104,36 @@ class UserHtmxController(
         }
     }
 
+    // ---------- Live User Search for the Live Search Card ----------
+
+    @GetMapping("/users/search", produces = [MediaType.TEXT_HTML_VALUE])
+    fun searchUsers(
+        @RequestParam("q", required = false) query: String?,
+        @RequestParam("gender", required = false) genderRaw: String?
+    ): String {
+        val genderFilter = parseGenderNullable(genderRaw)
+        val results = service.searchUsers(query, genderFilter)
+        return renderUserSearchResultsContainer(results, query, genderFilter)
+    }
+
+    // ---------- Rendering helpers ----------
+
     private fun parseGender(value: String?): Gender =
         when (value?.uppercase()) {
             "FEMALE" -> Gender.FEMALE
             "MALE" -> Gender.MALE
             "OTHER" -> Gender.OTHER
+            "UNKNOWN" -> Gender.UNKNOWN
             else -> Gender.UNKNOWN
+        }
+
+    private fun parseGenderNullable(value: String?): Gender? =
+        when (value?.uppercase()) {
+            "FEMALE" -> Gender.FEMALE
+            "MALE" -> Gender.MALE
+            "OTHER" -> Gender.OTHER
+            "UNKNOWN" -> Gender.UNKNOWN
+            else -> null
         }
 
     private fun renderUserListContainer(users: List<User>): String =
@@ -242,6 +268,38 @@ class UserHtmxController(
             )
             append("</td>")
             append("</tr>")
+        }
+
+    private fun renderUserSearchResultsContainer(
+        users: List<User>,
+        query: String?,
+        gender: Gender?
+    ): String =
+        buildString {
+            append("<div id=\"user-search-results\" class=\"placeholder-box\">")
+
+            val hasFilter = !query.isNullOrBlank() || gender != null
+
+            if (!hasFilter) {
+                append("<p class=\"muted\">Type a search term or select a gender to filter users.</p>")
+            } else if (users.isEmpty()) {
+                append("<p class=\"muted\">No users found for this search.</p>")
+            } else {
+                append("<p class=\"muted\">Found ${users.size} user(s).</p>")
+                append("<ul class=\"muted-list\">")
+                for (user in users) {
+                    append("<li>")
+                    append("<strong>${escape(user.firstName)} ${escape(user.lastName)}</strong>")
+                    if (user.age != null) {
+                        append(" · ${user.age} years")
+                    }
+                    append(" · ${user.gender}")
+                    append("</li>")
+                }
+                append("</ul>")
+            }
+
+            append("</div>")
         }
 
     private fun option(value: String, label: String, selectedGender: Gender): String {

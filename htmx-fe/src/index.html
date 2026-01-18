@@ -34,23 +34,34 @@
     </header>
 
     <section class="grid">
-        <!-- Message Center card -->
+        <!-- ===================== MESSAGE CENTER CARD ===================== -->
         <article class="card card-primary">
             <header>
                 <h2>Message Center</h2>
                 <p class="subtitle">
                     A simple message board that demonstrates server-rendered HTML fragments.
                 </p>
+                <p class="subtitle">
+                    In this card you can post new messages and refresh the list without a full page reload.
+                    HTMX attributes used here:
+                    <code>hx-post</code> (submit the form via POST),
+                    <code>hx-get</code> (load messages),
+                    <code>hx-target</code> and <code>hx-swap</code> (where and how to insert the HTML),
+                    and <code>hx-on</code> (reset the form after a successful request).
+                </p>
             </header>
 
             <section>
-                <!-- New message form -->
+                <!-- HTMX: hx-post sends the form data via HTTP POST to the backend.
+                     hx-target defines the element whose content will be replaced by the response.
+                     hx-swap="innerHTML" replaces only the inner HTML of the target.
+                     hx-on listens to the htmx:afterRequest event and resets the form on successful requests. -->
                 <form class="compact-form"
                       id="new-message-form"
                       hx-post="http://localhost:8080/htmx/add-message"
                       hx-target="#messages"
                       hx-swap="innerHTML"
-                      hx-on::after-request="if(event.detail.successful) this.reset()">
+                      hx-on="htmx:afterRequest: if (event.detail.successful) this.reset()">
                     <label>
                         <span class="field-label">New message</span>
                         <input type="text"
@@ -63,8 +74,11 @@
                     </button>
                 </form>
 
-                <!-- Toolbar -->
                 <div class="toolbar">
+                    <!-- HTMX: hx-get triggers a GET request to reload the messages.
+                         hx-target points to the messages container.
+                         hx-swap="innerHTML" replaces only the inner content.
+                         hx-indicator shows a loading spinner while the request is in-flight. -->
                     <button class="secondary outline small"
                             hx-get="http://localhost:8080/htmx/messages"
                             hx-target="#messages"
@@ -80,7 +94,9 @@
                     </small>
                 </div>
 
-                <!-- Messages list loaded via HTMX -->
+                <!-- HTMX: hx-get loads the initial message list when the element is added to the DOM.
+                     hx-trigger="load" fires once when the element is loaded.
+                     hx-indicator points to a spinner that is shown while loading. -->
                 <div id="messages"
                      class="message-list"
                      hx-get="http://localhost:8080/htmx/messages"
@@ -91,22 +107,33 @@
             </section>
         </article>
 
-        <!-- Task Board card -->
+        <!-- ===================== TASK BOARD CARD ===================== -->
         <article class="card">
             <header>
                 <h2>Task Board</h2>
                 <p class="subtitle">
                     A small task list that demonstrates CRUD-style interactions with HTMX.
                 </p>
+                <p class="subtitle">
+                    In this card you can create tasks, load the task list and interact with
+                    server-rendered buttons for toggling and deleting tasks.
+                    HTMX attributes here include:
+                    <code>hx-post</code> and <code>hx-get</code> (create and load),
+                    <code>hx-target</code>/<code>hx-swap</code> (swap the list container),
+                    and an <code>hx-on</code> handler to clear the form after successful requests.
+                </p>
             </header>
 
             <section>
-                <!-- Create task form -->
+                <!-- HTMX: hx-post sends the new task title to the backend via POST.
+                     hx-target points to the task-list container which will be replaced.
+                     hx-swap="outerHTML" replaces the entire task-list element.
+                     hx-on resets the form after a successful HTMX request. -->
                 <form class="compact-form"
                       hx-post="http://localhost:8080/htmx/tasks"
                       hx-target="#task-list"
                       hx-swap="outerHTML"
-                      hx-on::after-request="if(event.detail.successful) this.reset()">
+                      hx-on="htmx:afterRequest: if (event.detail.successful) this.reset()">
                     <label>
                         <span class="field-label">New task</span>
                         <input type="text"
@@ -119,8 +146,11 @@
                     </button>
                 </form>
 
-                <!-- Toolbar for loading tasks -->
                 <div class="toolbar">
+                    <!-- HTMX: hx-get loads or reloads the task list from the backend.
+                         hx-target selects the task-list container to update.
+                         hx-swap="outerHTML" swaps the entire container.
+                         hx-indicator shows a loading spinner while the request is running. -->
                     <button class="secondary outline small"
                             hx-get="http://localhost:8080/htmx/tasks"
                             hx-target="#task-list"
@@ -137,7 +167,10 @@
                     </small>
                 </div>
 
-                <!-- Task list container: replaced by backend -->
+                <!-- HTMX: hx-get triggers the initial load of tasks when the element is loaded.
+                     hx-trigger="load" ensures the request runs once on page load.
+                     hx-swap="outerHTML" allows the backend to return a complete replacement div.
+                     hx-indicator references the spinner for loading state. -->
                 <div id="task-list"
                      class="placeholder-box"
                      hx-get="http://localhost:8080/htmx/tasks"
@@ -145,13 +178,13 @@
                      hx-swap="outerHTML"
                      hx-indicator="#tasks-indicator">
                     <p class="muted">
-                        The initial task list is loaded from the backend when this card becomes visible.
+                        Loading tasks...
                     </p>
                 </div>
             </section>
         </article>
 
-        <!-- User Card: CRUD for a richer user object -->
+        <!-- ===================== USER CARD (FULL CRUD) ===================== -->
         <article class="card">
             <header>
                 <h2>User Card</h2>
@@ -159,15 +192,30 @@
                     Demonstrates CRUD operations for a richer domain object with multiple fields.
                     Each row can be edited inline via HTMX.
                 </p>
+                <p class="subtitle">
+                    In this card you can create users, load the full user table,
+                    and use server-rendered buttons to edit or delete users.
+                    HTMX attributes here use:
+                    <code>hx-post</code> (create),
+                    <code>hx-get</code> (load and switch to edit view),
+                    <code>hx-put</code> (update via inline form),
+                    <code>hx-delete</code> (delete a row),
+                    <code>hx-target="closest tr"</code> (update only the clicked row),
+                    <code>hx-swap="outerHTML"</code> (replace the row),
+                    and <code>hx-include</code> (include field values from the row in the request).
+                </p>
             </header>
 
             <section>
-                <!-- Create user form -->
+                <!-- HTMX: hx-post submits the user creation form as application/x-www-form-urlencoded.
+                     hx-target points to the #user-list container.
+                     hx-swap="outerHTML" replaces the entire user list container.
+                     hx-on resets the form after a successful HTMX request. -->
                 <form class="user-form"
                       hx-post="http://localhost:8080/htmx/users"
                       hx-target="#user-list"
                       hx-swap="outerHTML"
-                      hx-on::after-request="if(event.detail.successful) this.reset()">
+                      hx-on="htmx:afterRequest: if (event.detail.successful) this.reset()">
                     <div class="user-form-row">
                         <label>
                             <span class="field-label">First name</span>
@@ -209,8 +257,11 @@
                     </button>
                 </form>
 
-                <!-- Toolbar for loading users -->
                 <div class="toolbar">
+                    <!-- HTMX: hx-get loads or reloads the entire user list table.
+                         hx-target is the #user-list container.
+                         hx-swap="outerHTML" replaces the whole box so the backend controls the markup.
+                         hx-indicator references the spinner for loading state. -->
                     <button class="secondary outline small"
                             hx-get="http://localhost:8080/htmx/users"
                             hx-target="#user-list"
@@ -226,7 +277,10 @@
                     </small>
                 </div>
 
-                <!-- User list container: replaced by backend -->
+                <!-- HTMX: hx-get fetches the initial user table when the card is loaded.
+                     hx-trigger="load" fires when the element is added to the DOM.
+                     hx-swap="outerHTML" lets the backend return a full replacement div.
+                     hx-indicator shows a spinner while the request is active. -->
                 <div id="user-list"
                      class="placeholder-box"
                      hx-get="http://localhost:8080/htmx/users"
@@ -234,49 +288,86 @@
                      hx-swap="outerHTML"
                      hx-indicator="#users-indicator">
                     <p class="muted">
-                        The initial list of users will be loaded from the backend. Each row provides
-                        edit and delete actions rendered by the server.
+                        Loading users...
                     </p>
                 </div>
             </section>
         </article>
 
-        <!-- Live User Search card (backend can be added later) -->
+        <!-- ===================== LIVE USER SEARCH CARD ===================== -->
         <article class="card">
             <header>
-                <h2>Live User Search (planned)</h2>
+                <h2>Live User Search</h2>
                 <p class="subtitle">
-                    Live search powered by HTMX with debounced requests.
+                    Live, debounced search over all users using HTMX and server-side filtering.
+                </p>
+                <p class="subtitle">
+                    In this card you can search through the demo users by name and optional gender filter.
+                    HTMX attributes used:
+                    <code>hx-get</code> (send search queries to the server),
+                    <code>hx-trigger</code> with <code>delay</code> (debounced requests),
+                    <code>hx-target</code> (where to render the results),
+                    <code>hx-indicator</code> (show a loading spinner),
+                    and <code>hx-include</code> (include additional filter fields in the request).
                 </p>
             </header>
 
             <section>
-                <label>
-                    <span class="field-label">Search term</span>
-                    <input id="user-search-input"
-                           type="search"
-                           name="q"
-                           placeholder="Start typing to search"
-                           hx-get="http://localhost:8080/htmx/users/search"
-                           hx-target="#user-search-results"
-                           hx-trigger="keyup changed delay:300ms"
-                           hx-indicator="#user-search-indicator">
-                </label>
+                <div class="user-form-row">
+                    <!-- HTMX: hx-get sends a GET request to the search endpoint whenever the trigger fires.
+                         hx-target points to the #user-search-results box to be updated.
+                         hx-trigger="keyup changed delay:300ms" debounces input so the request is delayed 300ms after typing stops.
+                         hx-indicator references a spinner element shown while loading.
+                         hx-include includes the gender select field as extra query parameters. -->
+                    <label>
+                        <span class="field-label">Search term</span>
+                        <input id="user-search-input"
+                               type="search"
+                               name="q"
+                               placeholder="Type a name (e.g. Alex, Chris, Sam)"
+                               hx-get="http://localhost:8080/htmx/users/search"
+                               hx-target="#user-search-results"
+                               hx-trigger="keyup changed delay:300ms"
+                               hx-indicator="#user-search-indicator"
+                               hx-include="#user-search-gender">
+                    </label>
+
+                    <!-- HTMX: hx-get sends a GET request when the gender select changes.
+                         hx-target updates the same results container.
+                         hx-trigger="change" fires when the select value changes.
+                         hx-indicator shows the spinner.
+                         hx-include adds the current search term input to the request so both q and gender are sent. -->
+                    <label>
+                        <span class="field-label">Gender filter</span>
+                        <select id="user-search-gender" name="gender"
+                                hx-get="http://localhost:8080/htmx/users/search"
+                                hx-target="#user-search-results"
+                                hx-trigger="change"
+                                hx-indicator="#user-search-indicator"
+                                hx-include="#user-search-input">
+                            <option value="">All genders</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="MALE">Male</option>
+                            <option value="OTHER">Other</option>
+                            <option value="UNKNOWN">Prefer not to say</option>
+                        </select>
+                    </label>
+                </div>
 
                 <div class="toolbar">
                     <span id="user-search-indicator"
                           class="loading-indicator"
                           aria-hidden="true"></span>
                     <small class="toolbar-hint">
-                        HTMX will send <code>?q=...</code> to <code>/htmx/users/search</code>
-                        after you stop typing. The backend endpoint can be implemented later.
+                        HTMX sends <code>q</code> and <code>gender</code> as query parameters to
+                        <code>/htmx/users/search</code> with a small debounce delay.
                     </small>
                 </div>
 
                 <div id="user-search-results" class="placeholder-box">
                     <p class="muted">
-                        This area will show a server-rendered HTML fragment, for example
-                        a list of matching users.
+                        Type at least one character or choose a gender to search in the demo user set.
+                        Results are rendered on the server and swapped into this area.
                     </p>
                 </div>
             </section>

@@ -47,6 +47,28 @@ class UserService(
         return repo.update(updated)
     }
 
+    fun searchUsers(query: String?, gender: Gender?): List<User> {
+        val normalizedQuery = query
+            ?.trim()
+            ?.lowercase()
+            ?.takeIf { it.isNotEmpty() }
+
+        val all = repo.findAll()
+
+        return all.filter { user ->
+            val matchesQuery = normalizedQuery?.let { q ->
+                user.firstName.lowercase().contains(q) ||
+                        user.lastName.lowercase().contains(q)
+            } ?: true
+
+            val matchesGender = gender?.let { g ->
+                user.gender == g
+            } ?: true
+
+            matchesQuery && matchesGender
+        }
+    }
+
     private fun createValidatedUser(command: CreateUserCommand): User {
         require(command.firstName.isNotBlank()) { "firstName must not be blank" }
         require(command.lastName.isNotBlank()) { "lastName must not be blank" }
