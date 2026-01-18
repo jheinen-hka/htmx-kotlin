@@ -1,39 +1,193 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="HTMX in Kotlin for Projektarbeit 2 in Master">
     <meta name="author" content="Josiah Heinen - hejo1030 - 61728">
-    <title>HTMX Demo</title>
+    <title>HTMX Kotlin Demo Dashboard</title>
+
+    <!-- Pico.css for base styling and components -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <!-- Custom styling on top of Pico -->
     <link rel="stylesheet" href="./style.css">
-    <!-- import htmx library via the script tag -->
+
+    <!-- HTMX via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7"></script>
     <script>
-        htmx.config.selfRequestsOnly = false;  // Cross-Origin erlauben (HTMX 2.x)
+        // Allow cross-origin requests to the Kotlin backend running on localhost:8080
+        htmx.config.selfRequestsOnly = false;
     </script>
 </head>
 <body>
-    <h3>HTMX Demo</h3>
-    <p>In this demo application a list of messages will be laoded from the server to a div on this page wih the help of htmx attributes</p>
+<main class="container dashboard">
+    <header class="hero">
+        <div class="hero-text">
+            <span class="badge">HTMX + Kotlin</span>
+            <h1>Interactive Demo Dashboard</h1>
+            <p>
+                A small dashboard that demonstrates HTML-over-the-wire with HTMX
+                and a Kotlin / Spring Boot backend.
+            </p>
+        </div>
+    </header>
 
-    <hr>
+    <section class="grid">
+        <!-- Message Center card -->
+        <article class="card card-primary">
+            <header>
+                <h2>Message Center</h2>
+                <p class="subtitle">
+                    A simple message board that demonstrates server-rendered HTML fragments.
+                </p>
+            </header>
 
-    <!-- get messages from the server without reloading the page -->
-    <!-- hx-get sends a http GET request to the backend server -->
-    <!-- hx-trigger defines when an action should be triggered; =load means that the request should be sent when the element is loaded in the DOM -->
-    <div id="messages" hx-get="http://localhost:8080/htmx/messages" hx-trigger="load">
-        Loading Messages...
-    </div>
+            <section>
+                <!-- New message form -->
+                <form class="grid compact-form"
+                      id="new-message-form"
+                      hx-post="http://localhost:8080/htmx/add-message"
+                      hx-target="#messages"
+                      hx-swap="innerHTML">
+                    <label>
+                        <span class="field-label">New message</span>
+                        <input type="text"
+                               name="message"
+                               placeholder="Type a message and press Enter">
+                    </label>
+                    <button type="submit" class="primary">
+                        Send
+                    </button>
+                </form>
 
-    <hr>
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <button class="secondary outline small"
+                            hx-get="http://localhost:8080/htmx/messages"
+                            hx-target="#messages"
+                            hx-swap="innerHTML"
+                            hx-indicator="#messages-indicator">
+                        ↻ Refresh
+                    </button>
+                    <span id="messages-indicator"
+                          class="loading-indicator"
+                          aria-hidden="true"></span>
+                    <small class="toolbar-hint">
+                        Messages are fully rendered on the server and swapped into this card.
+                    </small>
+                </div>
 
-    <!-- hx-post sends data vie http POST to the server with the data in the form -->
-    <!-- hx-target defines what part of the DOM should be updated (-> the div with id messages) -->
-    <!-- hx-swap defines how the content of the DOM should be replaced (-> update the inner part of the div) -->
-    <form hx-post="http://localhost:8080/htmx/add-message" hx-target="#messages" hx-swap="innerHTML" hx-ext="json-enc">
-        <input type="text" name="message" placeholder="Your Message">
-        <button type="submit">Submit &raquo;</button>
-    </form>
+                <!-- Messages list loaded via HTMX -->
+                <div id="messages"
+                     class="message-list"
+                     hx-get="http://localhost:8080/htmx/messages"
+                     hx-trigger="load"
+                     hx-indicator="#messages-indicator">
+                    Loading messages...
+                </div>
+            </section>
+        </article>
 
+        <!-- Task Board card -->
+        <article class="card">
+            <header>
+                <h2>Task Board (planned)</h2>
+                <p class="subtitle">
+                    Placeholder for a richer CRUD example using HTMX (to be implemented).
+                </p>
+            </header>
+
+            <section>
+                <form class="grid compact-form"
+                      hx-post="http://localhost:8080/htmx/tasks"
+                      hx-target="#task-list"
+                      hx-swap="outerHTML">
+                    <label>
+                        <span class="field-label">New task</span>
+                        <input type="text"
+                               name="title"
+                               placeholder="Describe a task (backend TBD)">
+                    </label>
+                    <button type="submit" class="secondary">
+                        Add task
+                    </button>
+                </form>
+
+                <div class="toolbar">
+                    <button class="secondary outline small"
+                            hx-get="http://localhost:8080/htmx/tasks"
+                            hx-target="#task-list"
+                            hx-swap="outerHTML"
+                            hx-indicator="#tasks-indicator">
+                        Load tasks
+                    </button>
+                    <span id="tasks-indicator"
+                          class="loading-indicator"
+                          aria-hidden="true"></span>
+                </div>
+
+                <div id="task-list" class="placeholder-box">
+                    <p class="muted">
+                        This section is prepared for a richer HTMX example, such as:
+                    </p>
+                    <ul class="muted-list">
+                        <li>Loading tasks via <code>hx-get</code></li>
+                        <li>Marking tasks as done via <code>hx-put</code></li>
+                        <li>Deleting tasks with <code>hx-delete</code> and <code>hx-confirm</code></li>
+                        <li>Row-level updates using <code>hx-target="closest li"</code></li>
+                    </ul>
+                    <p class="muted">
+                        The backend endpoints (e.g. <code>/htmx/tasks</code>) can be added later.
+                    </p>
+                </div>
+            </section>
+        </article>
+
+        <!-- Live User Search card -->
+        <article class="card">
+            <header>
+                <h2>Live User Search (planned)</h2>
+                <p class="subtitle">
+                    Live search powered by HTMX with debounced requests.
+                </p>
+            </header>
+
+            <section>
+                <label>
+                    <span class="field-label">Search term</span>
+                    <input id="user-search-input"
+                           type="search"
+                           name="q"
+                           placeholder="Start typing to search (backend TBD)"
+                           hx-get="http://localhost:8080/htmx/users/search"
+                           hx-target="#user-search-results"
+                           hx-trigger="keyup changed delay:300ms"
+                           hx-indicator="#user-search-indicator">
+                </label>
+
+                <div class="toolbar">
+                    <span id="user-search-indicator"
+                          class="loading-indicator"
+                          aria-hidden="true"></span>
+                    <small class="toolbar-hint">
+                        HTMX will send <code>?q=...</code> to <code>/htmx/users/search</code> after you stop typing.
+                    </small>
+                </div>
+
+                <div id="user-search-results" class="placeholder-box">
+                    <p class="muted">
+                        This area will show a server-rendered HTML fragment, for example
+                        a list of matching users. The endpoint can be implemented later.
+                    </p>
+                </div>
+            </section>
+        </article>
+    </section>
+
+    <footer class="footer">
+        <small>Project: HTMX in Kotlin · Projektarbeit 2</small>
+        <small>Backend: Spring Boot (Kotlin) · Frontend: HTMX + Pico.css</small>
+    </footer>
+</main>
 </body>
 </html>
