@@ -49,12 +49,14 @@
                       id="new-message-form"
                       hx-post="http://localhost:8080/htmx/add-message"
                       hx-target="#messages"
-                      hx-swap="innerHTML">
+                      hx-swap="innerHTML"
+                      hx-on::after-request="if(event.detail.successful) this.reset()">
                     <label>
                         <span class="field-label">New message</span>
                         <input type="text"
                                name="message"
-                               placeholder="Type a message and press Enter">
+                               placeholder="Type a message and press Enter"
+                               required>
                     </label>
                     <button type="submit" class="primary">
                         Send
@@ -103,12 +105,14 @@
                 <form class="compact-form"
                       hx-post="http://localhost:8080/htmx/tasks"
                       hx-target="#task-list"
-                      hx-swap="outerHTML">
+                      hx-swap="outerHTML"
+                      hx-on::after-request="if(event.detail.successful) this.reset()">
                     <label>
                         <span class="field-label">New task</span>
                         <input type="text"
                                name="title"
-                               placeholder="Describe a task">
+                               placeholder="Describe a task"
+                               required>
                     </label>
                     <button type="submit" class="secondary">
                         Add task
@@ -141,7 +145,97 @@
                      hx-swap="outerHTML"
                      hx-indicator="#tasks-indicator">
                     <p class="muted">
-                        Initial task list is loaded from the backend when this card becomes visible.
+                        The initial task list is loaded from the backend when this card becomes visible.
+                    </p>
+                </div>
+            </section>
+        </article>
+
+        <!-- User Card: CRUD for a richer user object -->
+        <article class="card">
+            <header>
+                <h2>User Card</h2>
+                <p class="subtitle">
+                    Demonstrates CRUD operations for a richer domain object with multiple fields.
+                    Each row can be edited inline via HTMX.
+                </p>
+            </header>
+
+            <section>
+                <!-- Create user form -->
+                <form class="user-form"
+                      hx-post="http://localhost:8080/htmx/users"
+                      hx-target="#user-list"
+                      hx-swap="outerHTML"
+                      hx-on::after-request="if(event.detail.successful) this.reset()">
+                    <div class="user-form-row">
+                        <label>
+                            <span class="field-label">First name</span>
+                            <input type="text"
+                                   name="firstName"
+                                   placeholder="First name"
+                                   required>
+                        </label>
+                        <label>
+                            <span class="field-label">Last name</span>
+                            <input type="text"
+                                   name="lastName"
+                                   placeholder="Last name"
+                                   required>
+                        </label>
+                    </div>
+                    <div class="user-form-row">
+                        <label>
+                            <span class="field-label">Age</span>
+                            <input type="number"
+                                   name="age"
+                                   min="0"
+                                   max="130"
+                                   placeholder="Age">
+                        </label>
+                        <label>
+                            <span class="field-label">Gender</span>
+                            <select name="gender">
+                                <option value="">Select gender</option>
+                                <option value="FEMALE">Female</option>
+                                <option value="MALE">Male</option>
+                                <option value="OTHER">Other</option>
+                                <option value="UNKNOWN">Prefer not to say</option>
+                            </select>
+                        </label>
+                    </div>
+                    <button type="submit" class="secondary">
+                        Create user
+                    </button>
+                </form>
+
+                <!-- Toolbar for loading users -->
+                <div class="toolbar">
+                    <button class="secondary outline small"
+                            hx-get="http://localhost:8080/htmx/users"
+                            hx-target="#user-list"
+                            hx-swap="outerHTML"
+                            hx-indicator="#users-indicator">
+                        Load users
+                    </button>
+                    <span id="users-indicator"
+                          class="loading-indicator"
+                          aria-hidden="true"></span>
+                    <small class="toolbar-hint">
+                        User details, edit and delete actions are rendered on the server as HTMX-enabled HTML.
+                    </small>
+                </div>
+
+                <!-- User list container: replaced by backend -->
+                <div id="user-list"
+                     class="placeholder-box"
+                     hx-get="http://localhost:8080/htmx/users"
+                     hx-trigger="load"
+                     hx-swap="outerHTML"
+                     hx-indicator="#users-indicator">
+                    <p class="muted">
+                        The initial list of users will be loaded from the backend. Each row provides
+                        edit and delete actions rendered by the server.
                     </p>
                 </div>
             </section>
