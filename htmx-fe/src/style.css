@@ -13,6 +13,24 @@ body {
     padding-block: 2.5rem;
 }
 
+/* Global error banner for HTMX errors */
+
+.error-banner {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.6rem;
+    background: rgba(220, 38, 38, 0.18);
+    border: 1px solid rgba(248, 113, 113, 0.85);
+    color: #fee2e2;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* Hero section */
 
 .hero {
@@ -210,7 +228,9 @@ body {
     transform: scale(0.7);
 }
 
-.htmx-request .loading-indicator,
+/* HTMX will add the .htmx-request class to the element marked with hx-indicator
+   while a request is active. This makes the spinner visible only during requests. */
+.htmx-request.loading-indicator,
 .loading-indicator.htmx-request {
     opacity: 1;
     transform: scale(1);

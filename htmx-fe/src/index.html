@@ -21,6 +21,14 @@
 </head>
 <body>
 <main class="container dashboard">
+
+    <!-- Global error banner for HTMX/network/server errors.
+         Hidden by default, shown via JavaScript when HTMX error events fire. -->
+    <div id="htmx-error-banner" class="error-banner" hidden>
+        <strong>Warning:</strong>
+        <span id="htmx-error-text">An error occurred while talking to the server.</span>
+    </div>
+
     <header class="hero">
         <div class="hero-text">
             <span class="badge">HTMX + Kotlin</span>
@@ -47,7 +55,7 @@
                     <code>hx-post</code> (submit the form via POST),
                     <code>hx-get</code> (load messages),
                     <code>hx-target</code> and <code>hx-swap</code> (where and how to insert the HTML),
-                    and <code>hx-on</code> (reset the form after a successful request).
+                    and <code>hx-on::after-request</code> (reset the form after a successful request).
                 </p>
             </header>
 
@@ -55,13 +63,16 @@
                 <!-- HTMX: hx-post sends the form data via HTTP POST to the backend.
                      hx-target defines the element whose content will be replaced by the response.
                      hx-swap="innerHTML" replaces only the inner HTML of the target.
-                     hx-on listens to the htmx:afterRequest event and resets the form on successful requests. -->
+                     hx-on::after-request runs the handler after any htmx request from this element;
+                     event.detail.successful is true for 2xx responses, then this.reset() clears the form. -->
                 <form class="compact-form"
                       id="new-message-form"
+                      action="http://localhost:8080/htmx/add-message"
+                      method="post"
                       hx-post="http://localhost:8080/htmx/add-message"
                       hx-target="#messages"
                       hx-swap="innerHTML"
-                      hx-on="htmx:afterRequest: if (event.detail.successful) this.reset()">
+                      hx-on::after-request="if (event.detail.successful) this.reset()">
                     <label>
                         <span class="field-label">New message</span>
                         <input type="text"
@@ -120,7 +131,7 @@
                     HTMX attributes here include:
                     <code>hx-post</code> and <code>hx-get</code> (create and load),
                     <code>hx-target</code>/<code>hx-swap</code> (swap the list container),
-                    and an <code>hx-on</code> handler to clear the form after successful requests.
+                    and <code>hx-on::after-request</code> to clear the form after successful requests.
                 </p>
             </header>
 
@@ -128,12 +139,14 @@
                 <!-- HTMX: hx-post sends the new task title to the backend via POST.
                      hx-target points to the task-list container which will be replaced.
                      hx-swap="outerHTML" replaces the entire task-list element.
-                     hx-on resets the form after a successful HTMX request. -->
+                     hx-on::after-request resets the form on successful HTMX responses. -->
                 <form class="compact-form"
+                      action="http://localhost:8080/htmx/tasks"
+                      method="post"
                       hx-post="http://localhost:8080/htmx/tasks"
                       hx-target="#task-list"
                       hx-swap="outerHTML"
-                      hx-on="htmx:afterRequest: if (event.detail.successful) this.reset()">
+                      hx-on::after-request="if (event.detail.successful) this.reset()">
                     <label>
                         <span class="field-label">New task</span>
                         <input type="text"
@@ -178,7 +191,7 @@
                      hx-swap="outerHTML"
                      hx-indicator="#tasks-indicator">
                     <p class="muted">
-                        Loading tasks...
+                        The initial task list is loaded from the backend when this card becomes visible.
                     </p>
                 </div>
             </section>
@@ -210,12 +223,14 @@
                 <!-- HTMX: hx-post submits the user creation form as application/x-www-form-urlencoded.
                      hx-target points to the #user-list container.
                      hx-swap="outerHTML" replaces the entire user list container.
-                     hx-on resets the form after a successful HTMX request. -->
+                     hx-on::after-request resets the form when the user was successfully created. -->
                 <form class="user-form"
+                      action="http://localhost:8080/htmx/users"
+                      method="post"
                       hx-post="http://localhost:8080/htmx/users"
                       hx-target="#user-list"
                       hx-swap="outerHTML"
-                      hx-on="htmx:afterRequest: if (event.detail.successful) this.reset()">
+                      hx-on::after-request="if (event.detail.successful) this.reset()">
                     <div class="user-form-row">
                         <label>
                             <span class="field-label">First name</span>
@@ -288,7 +303,8 @@
                      hx-swap="outerHTML"
                      hx-indicator="#users-indicator">
                     <p class="muted">
-                        Loading users...
+                        The initial list of users will be loaded from the backend. Each row provides
+                        edit and delete actions rendered by the server.
                     </p>
                 </div>
             </section>
@@ -375,9 +391,70 @@
     </section>
 
     <footer class="footer">
-        <small>Project: HTMX in Kotlin · Projektarbeit 2</small>
+        <small>Project: HTMX in Kotlin · Projektarbeit 2 · Josiah Heinen · 61728</small>
         <small>Backend: Spring Boot (Kotlin) · Frontend: HTMX + Pico.css</small>
     </footer>
 </main>
+
+<!-- Global HTMX error handling script.
+     Keeps network errors visible until a successful request happens. -->
+<script>
+    // Tracks whether we have a persistent "server unreachable" situation.
+    let htmxServerIssue = false;
+
+    // Handle network-level errors: server not reachable, DNS issues, CORS, etc.
+    document.body.addEventListener('htmx:sendError', function (event) {
+        htmxServerIssue = true;
+        showHtmxError('Network error: could not reach the server.', true);
+    });
+
+    // Handle HTTP errors: 4xx/5xx status codes from the server.
+    document.body.addEventListener('htmx:responseError', function (event) {
+        const status = event.detail.xhr ? event.detail.xhr.status : 'unknown';
+        showHtmxError('Server error: request failed with status ' + status + '.', false);
+    });
+
+    // Handle timeout events if a request takes too long.
+    document.body.addEventListener('htmx:timeout', function (event) {
+        showHtmxError('Request timeout: the server took too long to respond.', false);
+    });
+
+    // If there was a server issue and we get a successful response again,
+    // we hide the banner because connectivity is restored.
+    document.body.addEventListener('htmx:afterRequest', function (event) {
+        if (event.detail.successful && htmxServerIssue) {
+            hideHtmxError();
+            htmxServerIssue = false;
+        }
+    });
+
+    // Show the error banner. If "persistent" is true, do not auto-hide.
+    function showHtmxError(message, persistent) {
+        const banner = document.getElementById('htmx-error-banner');
+        const text = document.getElementById('htmx-error-text');
+        if (!banner || !text) return;
+
+        text.textContent = message;
+        banner.hidden = false;
+
+        // Cancel any previous auto-hide
+        window.clearTimeout(banner._hideTimeout);
+
+        // Only auto-hide if not persistent
+        if (!persistent) {
+            banner._hideTimeout = window.setTimeout(function () {
+                banner.hidden = true;
+            }, 6000);
+        }
+    }
+
+    // Explicit helper to hide the error banner.
+    function hideHtmxError() {
+        const banner = document.getElementById('htmx-error-banner');
+        if (!banner) return;
+        banner.hidden = true;
+    }
+</script>
+
 </body>
 </html>
