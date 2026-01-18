@@ -21,7 +21,7 @@
     <!-- get messages from the server without reloading the page -->
     <!-- hx-get sends a http GET request to the backend server -->
     <!-- hx-trigger defines when an action should be triggered; =load means that the request should be sent when the element is loaded in the DOM -->
-    <div id="messages" hx-get="http://localhost:8080/messages" hx-trigger="load">
+    <div id="messages" hx-get="http://localhost:8080/htmx/messages" hx-trigger="load">
         Loading Messages...
     </div>
 
@@ -30,7 +30,7 @@
     <!-- hx-post sends data vie http POST to the server with the data in the form -->
     <!-- hx-target defines what part of the DOM should be updated (-> the div with id messages) -->
     <!-- hx-swap defines how the content of the DOM should be replaced (-> update the inner part of the div) -->
-    <form hx-post="http://localhost:8080/add-message" hx-target="#messages" hx-swap="innerHTML" hx-ext="json-enc">
+    <form hx-post="http://localhost:8080/htmx/add-message" hx-target="#messages" hx-swap="innerHTML" hx-ext="json-enc">
         <input type="text" name="message" placeholder="Your Message">
         <button type="submit">Submit &raquo;</button>
     </form>
