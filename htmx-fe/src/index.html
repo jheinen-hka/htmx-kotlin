@@ -27,7 +27,8 @@
             <h1>Interactive Demo Dashboard</h1>
             <p>
                 A small dashboard that demonstrates HTML-over-the-wire with HTMX
-                and a Kotlin / Spring Boot backend.
+                and a Kotlin / Spring Boot backend. The same services can be used
+                by JSON APIs and the HTMX-based UI.
             </p>
         </div>
     </header>
@@ -44,7 +45,7 @@
 
             <section>
                 <!-- New message form -->
-                <form class="grid compact-form"
+                <form class="compact-form"
                       id="new-message-form"
                       hx-post="http://localhost:8080/htmx/add-message"
                       hx-target="#messages"
@@ -91,14 +92,15 @@
         <!-- Task Board card -->
         <article class="card">
             <header>
-                <h2>Task Board (planned)</h2>
+                <h2>Task Board</h2>
                 <p class="subtitle">
-                    Placeholder for a richer CRUD example using HTMX (to be implemented).
+                    A small task list that demonstrates CRUD-style interactions with HTMX.
                 </p>
             </header>
 
             <section>
-                <form class="grid compact-form"
+                <!-- Create task form -->
+                <form class="compact-form"
                       hx-post="http://localhost:8080/htmx/tasks"
                       hx-target="#task-list"
                       hx-swap="outerHTML">
@@ -106,13 +108,14 @@
                         <span class="field-label">New task</span>
                         <input type="text"
                                name="title"
-                               placeholder="Describe a task (backend TBD)">
+                               placeholder="Describe a task">
                     </label>
                     <button type="submit" class="secondary">
                         Add task
                     </button>
                 </form>
 
+                <!-- Toolbar for loading tasks -->
                 <div class="toolbar">
                     <button class="secondary outline small"
                             hx-get="http://localhost:8080/htmx/tasks"
@@ -124,26 +127,27 @@
                     <span id="tasks-indicator"
                           class="loading-indicator"
                           aria-hidden="true"></span>
+                    <small class="toolbar-hint">
+                        Tasks are rendered on the server. Toggle and delete actions are provided
+                        by HTMX attributes in the server response.
+                    </small>
                 </div>
 
-                <div id="task-list" class="placeholder-box">
+                <!-- Task list container: replaced by backend -->
+                <div id="task-list"
+                     class="placeholder-box"
+                     hx-get="http://localhost:8080/htmx/tasks"
+                     hx-trigger="load"
+                     hx-swap="outerHTML"
+                     hx-indicator="#tasks-indicator">
                     <p class="muted">
-                        This section is prepared for a richer HTMX example, such as:
-                    </p>
-                    <ul class="muted-list">
-                        <li>Loading tasks via <code>hx-get</code></li>
-                        <li>Marking tasks as done via <code>hx-put</code></li>
-                        <li>Deleting tasks with <code>hx-delete</code> and <code>hx-confirm</code></li>
-                        <li>Row-level updates using <code>hx-target="closest li"</code></li>
-                    </ul>
-                    <p class="muted">
-                        The backend endpoints (e.g. <code>/htmx/tasks</code>) can be added later.
+                        Initial task list is loaded from the backend when this card becomes visible.
                     </p>
                 </div>
             </section>
         </article>
 
-        <!-- Live User Search card -->
+        <!-- Live User Search card (backend can be added later) -->
         <article class="card">
             <header>
                 <h2>Live User Search (planned)</h2>
@@ -158,7 +162,7 @@
                     <input id="user-search-input"
                            type="search"
                            name="q"
-                           placeholder="Start typing to search (backend TBD)"
+                           placeholder="Start typing to search"
                            hx-get="http://localhost:8080/htmx/users/search"
                            hx-target="#user-search-results"
                            hx-trigger="keyup changed delay:300ms"
@@ -170,14 +174,15 @@
                           class="loading-indicator"
                           aria-hidden="true"></span>
                     <small class="toolbar-hint">
-                        HTMX will send <code>?q=...</code> to <code>/htmx/users/search</code> after you stop typing.
+                        HTMX will send <code>?q=...</code> to <code>/htmx/users/search</code>
+                        after you stop typing. The backend endpoint can be implemented later.
                     </small>
                 </div>
 
                 <div id="user-search-results" class="placeholder-box">
                     <p class="muted">
                         This area will show a server-rendered HTML fragment, for example
-                        a list of matching users. The endpoint can be implemented later.
+                        a list of matching users.
                     </p>
                 </div>
             </section>

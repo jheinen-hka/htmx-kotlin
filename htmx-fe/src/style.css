@@ -47,12 +47,21 @@ body {
     margin-bottom: 0.6rem;
 }
 
-/* Cards */
+/* Cards: stacked vertically */
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Card appearance */
 
 .card {
     border-radius: 1.1rem;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.65);
     border: 1px solid rgba(30, 64, 175, 0.5);
+    text-align: left;
 }
 
 .card-primary {
@@ -74,25 +83,21 @@ body {
     opacity: 0.8;
 }
 
-/* Grid adjustments */
-.grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-/* Compact form inside cards */
+/* Compact form inside cards: left-aligned */
 
 .compact-form {
-    grid-template-columns: minmax(0, 1.8fr) auto;
-    row-gap: 0.6rem;
-    column-gap: 0.75rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    justify-items: start;
     align-items: flex-end;
+    column-gap: 0.75rem;
+    row-gap: 0.6rem;
     margin-bottom: 0.75rem;
 }
 
 .compact-form label {
-    margin-bottom: 0; /* prevent extra gap from Pico */
+    width: 100%;
+    margin-bottom: 0;
 }
 
 .field-label {
@@ -202,23 +207,6 @@ body {
     flex-direction: column;
     gap: 0.3rem;
     opacity: 0.8;
-}
-
-/* Ensure inputs and buttons in card forms are left-aligned */
-.compact-form {
-    display: grid;
-    grid-template-columns: 1fr auto;  /* input takes remaining space, button daneben */
-    justify-items: start;             /* align grid items to the left */
-    align-items: flex-end;
-    column-gap: 0.75rem;
-    row-gap: 0.6rem;
-    margin-bottom: 0.75rem;
-}
-
-/* Make sure text inside cards is left-aligned */
-.card header,
-.card section {
-    text-align: left;
 }
 
 @media (min-width: 720px) {
